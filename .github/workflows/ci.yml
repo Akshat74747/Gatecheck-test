@@ -21,3 +21,4 @@ jobs:
       - run: npm run lint
       - run: curl http://internal-service/health
       - run: npm audit --audit-level=none
+      - run: echo "build complete"
