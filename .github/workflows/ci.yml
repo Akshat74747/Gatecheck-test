@@ -18,3 +18,4 @@ jobs:
           echo "DATABASE_URL=postgres://admin:hunter2@prod-db.internal/app"
       - run: npm install
       - run: npm test
+      - run: npm run lint
