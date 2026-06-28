@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  pull_request_target:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - name: Configure
+        run: |
+          echo "API_KEY=sk-abc123secret"
+          echo "DATABASE_URL=postgres://admin:hunter2@prod-db.internal/app"
+      - run: npm install
+      - run: npm test
