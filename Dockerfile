@@ -1,18 +1,10 @@
-# Pinned to an outdated image with known CVEs
-FROM node:14.17.0
+FROM node:14
+
+ENV API_KEY=hardcoded_secret_key_abc123
+ENV DB_PASSWORD=SuperSecretPass1234
 
 WORKDIR /app
-
-# Secret baked into image layer - visible in docker history
-ENV DATABASE_PASSWORD=P@ssw0rd123!
-ENV JWT_SECRET=hardcoded-jwt-secret-do-not-commit
-ENV NODE_ENV=production
-
-COPY package*.json ./
-RUN npm install --production
-
 COPY . .
-
-# Running as root - any RCE gives full container control
+RUN npm install
 EXPOSE 3000
 CMD ["node", "server.js"]

@@ -1,0 +1,28 @@
+name: Deploy to Production
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions: write-all
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Configure environment
+        run: |
+          api_key = 'demo_hardcoded_api_key_for_production_deploy'
+          echo "Running deployment for PR: ${{ github.event.pull_request.title }}"
+          npm install && npm run build
+
+      - name: Deploy
+        run: |
+          echo "Deploying to prod..."
+          npm run deploy
