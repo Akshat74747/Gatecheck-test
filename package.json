@@ -1,0 +1,20 @@
+{
+  "name": "gatecheck-test-app",
+  "version": "1.0.0",
+  "description": "Example Node.js app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "4.17.1",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.15",
+    "axios": "0.21.1",
+    "node-serialize": "0.0.4",
+    "pg": "8.5.1",
+    "ejs": "3.1.6",
+    "socket.io": "2.3.0"
+  }
+}

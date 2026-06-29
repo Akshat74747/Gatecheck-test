@@ -1,10 +1,10 @@
-FROM ubuntu:latest
+FROM node:14
 
-RUN apt-get update && apt-get install -y curl nodejs npm
+ENV API_KEY=hardcoded_secret_key_abc123
+ENV DB_PASSWORD=SuperSecretPass1234
 
 WORKDIR /app
 COPY . .
 RUN npm install
-
 EXPOSE 3000
-CMD ["node", "app.js"]
+CMD ["node", "server.js"]

@@ -1,0 +1,47 @@
+name: Gatecheck Security Gate
+
+on:
+  push:
+    branches: ["feature/backend-api"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Gatecheck scan and check halt decision
+        run: |
+          echo "Querying Gatecheck for commit ${{ github.sha }}..."
+          for i in $(seq 1 10); do
+            RESULT=$(curl -sf \
+              "https://gatecheck-theta.vercel.app/api/pipeline/decision?repo=${{ github.repository }}&sha=${{ github.sha }}" \
+              -H "Authorization: Bearer ${{ secrets.GATECHECK_TOKEN }}" || echo '{"halt":false,"reason":"request failed"}')
+
+            HALT=$(echo "$RESULT"     | jq -r '.halt')
+            REASON=$(echo "$RESULT"   | jq -r '.reason   // "no reason"')
+            SEVERITY=$(echo "$RESULT" | jq -r '.severity // "none"')
+
+            echo "Attempt $i/10 -- halt: $HALT | severity: $SEVERITY | reason: $REASON"
+
+            if [ "$HALT" = "true" ]; then
+              echo ""
+              echo "Gatecheck: DEPLOYMENT BLOCKED"
+              echo "   Severity : $SEVERITY"
+              echo "   Reason   : $REASON"
+              echo "   View findings at https://gatecheck-theta.vercel.app/dashboard"
+              exit 1
+            fi
+
+            if [ "$REASON" = "no blocking findings" ]; then
+              echo ""
+              echo "Gatecheck: clear -- no blocking findings"
+              exit 0
+            fi
+
+            echo "   Scan not complete yet, waiting 15s..."
+            sleep 15
+          done
+
+          echo "Gatecheck: scan did not complete within 2.5 minutes -- proceeding"
+          exit 0

@@ -2,23 +2,32 @@ name: CI
 
 on:
   pull_request_target:
-    branches: [main]
-  push:
-    branches: [main]
+    types: [opened, synchronize]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-      - name: Configure
-        run: |
-          echo "API_KEY=sk-abc123secret"
-          echo "DATABASE_URL=postgres://admin:hunter2@prod-db.internal/app"
-      - run: npm install
-      - run: npm test
-      - run: npm run lint
-      - run: curl http://internal-service/health
-      - run: npm audit --audit-level=none
-      - run: echo "build complete"
+      - name: Checkout PR code
+        uses: actions/checkout@v3
+        with:
+          # Checks out the fork's code with write token in scope - RCE risk
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Runs attacker-controlled code with GITHUB_TOKEN write permissions
+      - name: Run tests
+        run: npm test
+
+      - name: Deploy preview
+        if: success()
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: ./scripts/deploy-preview.sh

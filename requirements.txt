@@ -1,0 +1,7 @@
+﻿flask==0.12.2
+django==1.11.0
+requests==2.18.0
+pyyaml==3.12
+pillow==5.1.0
+# trigger scan
+# demo trigger 04:19:17
