@@ -18,13 +18,13 @@ jobs:
               "https://gatecheck-theta.vercel.app/api/pipeline/decision?repo=${{ github.repository }}&sha=${{ github.sha }}" \
               -H "Authorization: Bearer ${{ secrets.GATECHECK_TOKEN }}" || echo '{"halt":false,"reason":"request failed"}')
 
-            DECISION=$(echo "$RESULT" | jq -r '.decision // "pending"')
+            HALT=$(echo "$RESULT"     | jq -r '.halt')
             REASON=$(echo "$RESULT"   | jq -r '.reason   // "no reason"')
             SEVERITY=$(echo "$RESULT" | jq -r '.severity // "none"')
 
-            echo "Attempt $i/10 -- decision: $DECISION | severity: $SEVERITY | reason: $REASON"
+            echo "Attempt $i/10 -- halt: $HALT | severity: $SEVERITY | reason: $REASON"
 
-            if [ "$DECISION" = "halt" ]; then
+            if [ "$HALT" = "true" ]; then
               echo ""
               echo "Gatecheck: DEPLOYMENT BLOCKED"
               echo "   Severity : $SEVERITY"
@@ -33,7 +33,7 @@ jobs:
               exit 1
             fi
 
-            if [ "$DECISION" = "allow" ]; then
+            if [ "$REASON" = "no blocking findings" ]; then
               echo ""
               echo "Gatecheck: clear -- no blocking findings"
               exit 0
